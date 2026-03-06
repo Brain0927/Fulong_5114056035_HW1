@@ -1,0 +1,474 @@
+/* ====================================================
+   全域與主題變數
+   ==================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg-primary: #0f1117;
+  --bg-card: #1a1d27;
+  --bg-card2: #21253a;
+  --accent: #6c63ff;
+  --accent2: #00d4aa;
+  --text-main: #e8eaf6;
+  --text-muted: #8890b0;
+  --cell-default: #252a3d;
+  --cell-hover: #323855;
+  --cell-start: #1b6e3a;
+  --cell-start-bg: #22c55e;
+  --cell-end: #7f1d1d;
+  --cell-end-bg: #ef4444;
+  --cell-obstacle: #374151;
+  --cell-obstacle-bg: #6b7280;
+  --border: #2e3356;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+
+/* 頂部標題區 */
+header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+
+header p {
+  color: var(--text-muted);
+  margin-top: .5rem;
+  font-size: .95rem;
+}
+
+/* 卡片 */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.8rem 2rem;
+  box-shadow: var(--shadow);
+  max-width: 900px;
+  margin: 0 auto 2rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent2);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: .7rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.card-title span.badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 600;
+  padding: .15rem .5rem;
+  border-radius: 99px;
+}
+
+/* 控制列 */
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.control-row label {
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+
+.control-row input[type=number] {
+  width: 80px;
+  padding: .5rem .75rem;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .2s;
+}
+
+.control-row input[type=number]:focus {
+  border-color: var(--accent);
+}
+
+/* 按鈕 */
+.btn {
+  padding: .55rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #9d6fff);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--accent2), #00b894);
+  color: #0f1117;
+}
+
+.btn-secondary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* 狀態資訊列 */
+.status-bar {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  font-size: .85rem;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-start {
+  background: var(--cell-start-bg);
+}
+
+.dot-end {
+  background: var(--cell-end-bg);
+}
+
+.dot-obstacle {
+  background: var(--cell-obstacle-bg);
+}
+
+/* 進度提示 */
+#phase-hint {
+  margin-top: .8rem;
+  color: var(--accent2);
+  font-size: .9rem;
+  font-weight: 500;
+  min-height: 1.4em;
+  transition: color .3s;
+}
+
+#phase-hint.warning {
+  color: #f59e0b;
+}
+
+#phase-hint.done {
+  color: #22c55e;
+}
+
+/* ====================================================
+   網格
+   ==================================================== */
+#grid-wrapper {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+}
+
+#grid-table {
+  border-collapse: separate;
+  border-spacing: 4px;
+  margin: 0 auto;
+}
+
+#grid-table td {
+  width: 68px;
+  height: 68px;
+  text-align: center;
+  vertical-align: middle;
+  background: var(--cell-default);
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  transition: background .18s, transform .15s, box-shadow .18s;
+  border: 2px solid transparent;
+  user-select: none;
+}
+
+#grid-table td:hover {
+  background: var(--cell-hover);
+  transform: scale(1.06);
+  border-color: var(--accent);
+  z-index: 2;
+}
+
+/* 座標標籤 */
+.cell-coord {
+  font-size: .6rem;
+  color: var(--text-muted);
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* 箭頭 */
+.cell-arrow {
+  font-size: 1.5rem;
+  line-height: 1;
+  display: block;
+}
+
+/* 價值 */
+.cell-value {
+  font-size: .65rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent2);
+  display: block;
+  margin-top: 2px;
+}
+
+/* 狀態顏色 */
+#grid-table td.cell-start {
+  background: var(--cell-start);
+  border-color: var(--cell-start-bg);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+}
+
+#grid-table td.cell-end {
+  background: var(--cell-end);
+  border-color: var(--cell-end-bg);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+}
+
+#grid-table td.cell-obstacle {
+  background: var(--cell-obstacle);
+  border-color: var(--cell-obstacle-bg);
+  cursor: not-allowed;
+}
+
+#grid-table td.cell-obstacle:hover {
+  transform: none;
+  border-color: var(--cell-obstacle-bg);
+}
+
+#grid-table td.cell-start:hover,
+#grid-table td.cell-end:hover {
+  transform: none;
+  cursor: default;
+}
+
+/* 訊息提示 */
+#message {
+  margin-top: 1rem;
+  padding: .7rem 1rem;
+  border-radius: 8px;
+  font-size: .9rem;
+  display: none;
+}
+
+#message.error {
+  background: rgba(239, 68, 68, .15);
+  color: #fca5a5;
+  display: block;
+}
+
+#message.success {
+  background: rgba(34, 197, 94, .12);
+  color: #86efac;
+  display: block;
+}
+
+/* 圖例 */
+.legend {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  font-size: .82rem;
+  margin-top: 1.2rem;
+  color: var(--text-muted);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.legend-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid;
+}
+
+/* RWD */
+@media (max-width: 600px) {
+  #grid-table td {
+    width: 52px;
+    height: 52px;
+  }
+
+  .cell-arrow {
+    font-size: 1.2rem;
+  }
+}
+
+/* ====================================================
+   HW1-3 價值迭代專屬樣式
+   ==================================================== */
+
+/* 金色 Badge */
+.badge-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: #1a0a00 !important;
+}
+
+/* 金色按鈕 */
+.btn-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #1a0a00;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+}
+
+.btn-gold:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.5);
+}
+
+/* 高亮文字 */
+.highlight-text {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+/* 最佳策略金色箭頭 */
+.cell-arrow.optimal {
+  color: #f59e0b;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.4);
+  animation: pulse-gold 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-gold {
+  from {
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+  }
+
+  to {
+    text-shadow: 0 0 20px rgba(245, 158, 11, 1), 0 0 40px rgba(245, 158, 11, 0.5);
+  }
+}
+
+/* 最佳策略格子微光效果 */
+#grid-table td.cell-optimal {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.08);
+}
+
+/* 最佳 V*(s) 數值顏色 */
+.cell-value.optimal-val {
+  color: #fbbf24;
+}
+
+/* 比較區塊 */
+.compare-box {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.compare-item {
+  flex: 1;
+  min-width: 180px;
+}
+
+.compare-label {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: .5rem;
+  text-align: center;
+}
+
+.compare-arrow {
+  font-size: 2rem;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  padding-top: 1.5rem;
+}
+
+.compare-grid {
+  display: grid;
+  gap: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem;
+}
+
+.compare-cell {
+  background: var(--bg-card2);
+  border-radius: 4px;
+  padding: .2rem .3rem;
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.compare-cell.improved {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.4);
+}
