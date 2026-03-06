@@ -167,7 +167,7 @@ python app.py
 7. [其他對話](#其他對話)
 8. [Evaluating RL Policy](#evaluating-rl-policy)
 9. [Developing RL Grid App](#developing-rl-grid-app)
-10. [相關截圖](#相關截圖)
+
 
 ---
 
@@ -331,18 +331,6 @@ function renderComparePanel(randomVals, optimalVals, n) {
 
 ---
 
-## 相關截圖
-
-截圖位置（Antigravity 自動儲存）：
-```
-gemini\antigravity\brain\8afa4ac2-98d3-4162-ad8d-428f4f47a680\
-├── random_policy_eval_1772761130094.png      ← HW1-2 隨機策略評估
-├── optimal_policy_eval_1772761148487.png     ← HW1-3 最佳策略（金色箭頭）
-├── comparison_panel_1772761150078.png        ← V(s) vs V*(s) 比較面板
-└── hw1_value_iteration_demo_*.webp           ← 完整操作錄影
-```
-
----
 
 *記錄時間：2026-03-06 10:05 (UTC+8)*
 
