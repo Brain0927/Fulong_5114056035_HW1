@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>強化學習 HW1 — 網格地圖與策略評估</title>
-  <meta name="description" content="強化學習作業 HW1：互動式 n×n 網格地圖開發、策略評估與價值迭代" />
+  <title>強化學習 HW1 — 網格地圖與策略評估 | 5114056035 Fulong Shi</title>
+  <meta name="description" content="強化學習 HW1：互動式網格地圖、隨機策略評估 V(s)、價值迭代最佳策略 V*(s)" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 
@@ -13,153 +13,135 @@
 
   <!-- 頂部標題 -->
   <header>
-    <h1>🤖 5114056035 FULONG,SHI</h1>
-    <h1>強化學習 HW1</h1>
-    <p>網格地圖開發 &amp; 策略評估 &amp; 價值迭代</p>
+    <h1>🤖 強化學習 HW1</h1>
+    <p>網格地圖 · 策略評估 · 價值迭代</p>
+    <span class="student-badge">5114056035 ｜ Fulong Shi</span>
   </header>
 
-  <!-- ========================
-     HW1-1 網格地圖開發
-     ======================== -->
-  <section class="card" id="section-hw1-1">
-    <div class="card-title">
-      <span>HW1-1　網格地圖開發</span>
-      <span class="badge">互動式</span>
-    </div>
+  <div class="main-wrapper">
+    <div class="layout-two-col">
 
-    <!-- 控制列 -->
-    <div class="control-row">
-      <label for="input-n">網格大小 n（5–9）：</label>
-      <input type="number" id="input-n" name="n" min="5" max="9" value="5" aria-label="輸入網格大小" />
-      <button class="btn btn-primary" id="btn-generate">生成網格</button>
-    </div>
+      <!-- ===================== 左欄：互動網格 ===================== -->
+      <div class="card" id="grid-card">
+        <div class="card-title">
+          <span>網格環境設定</span>
+          <span class="badge badge-purple">HW1-1</span>
+        </div>
 
-    <!-- 狀態欄 -->
-    <div class="status-bar">
-      <div class="status-item">
-        <span class="dot dot-start"></span>
-        起點：<strong id="status-start">未設定</strong>
+        <!-- 控制列 -->
+        <div class="control-row">
+          <label for="input-n">網格大小 n（5–9）：</label>
+          <input type="number" id="input-n" min="5" max="9" value="5" />
+          <button class="btn btn-primary" id="btn-generate">生成網格</button>
+          <button class="btn btn-outline" id="btn-reset">↺ 重設格子</button>
+        </div>
+
+        <!-- 狀態欄 -->
+        <div class="status-bar">
+          <div class="status-item">
+            <span class="dot dot-s"></span>起點：<strong id="st-start">未設定</strong>
+          </div>
+          <div class="status-item">
+            <span class="dot dot-e"></span>終點：<strong id="st-end">未設定</strong>
+          </div>
+          <div class="status-item">
+            <span class="dot dot-o"></span>障礙物：<strong id="st-obs">0 / 0</strong>
+          </div>
+        </div>
+
+        <!-- 操作提示 -->
+        <p id="phase-hint" class="idle">請先生成網格。</p>
+
+        <!-- 網格 -->
+        <div id="grid-wrapper"></div>
+
+        <!-- 圖例 -->
+        <div class="legend" style="margin-top:1rem;flex-direction:row;flex-wrap:wrap;gap:.8rem;">
+          <div class="legend-item">
+            <div class="legend-box" style="background:#1b6e3a;border-color:#22c55e"></div>起點
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background:#7f1d1d;border-color:#ef4444"></div>終點
+          </div>
+          <div class="legend-item">
+            <div class="legend-box" style="background:#374151;border-color:#6b7280"></div>障礙物
+          </div>
+          <div class="legend-item">
+            <span class="legend-arrow r">↑</span>隨機策略
+          </div>
+          <div class="legend-item">
+            <span class="legend-arrow o">↑</span>最佳策略 π*
+          </div>
+        </div>
+
+        <!-- 訊息提示 -->
+        <div id="message"></div>
       </div>
-      <div class="status-item">
-        <span class="dot dot-end"></span>
-        終點：<strong id="status-end">未設定</strong>
+
+      <!-- ===================== 右欄：演算法控制 ===================== -->
+      <div style="display:flex;flex-direction:column;gap:1.2rem;">
+
+        <!-- HW1-2 策略評估 -->
+        <div class="card">
+          <div class="card-title">
+            <span>策略評估</span>
+            <span class="badge badge-teal">HW1-2</span>
+          </div>
+          <div class="mdp-info">
+            隨機生成策略 π（↑↓←→），迭代 Bellman 方程式計算每格 V(s)。<br>
+            r=<code>-1</code>/步，終點 r=<code>0</code>，γ=<code>0.9</code>，θ=<code>1e-6</code>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary" id="btn-eval" disabled>▶ 執行策略評估</button>
+            <button class="btn btn-outline" id="btn-reeval" disabled>🔄 重新隨機策略</button>
+          </div>
+        </div>
+
+        <!-- HW1-3 價值迭代 -->
+        <div class="card">
+          <div class="card-title">
+            <span>價值迭代</span>
+            <span class="badge badge-gold">HW1-3</span>
+          </div>
+          <div class="mdp-info">
+            Bellman 最優更新：<code>V*(s) = max_a[r + γV*(s')]</code><br>
+            收斂後提取最佳策略 π*(s)，以金色箭頭顯示。
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-gold" id="btn-vi" disabled>⚡ 執行價值迭代</button>
+          </div>
+        </div>
+
+        <!-- 收斂資訊 -->
+        <div class="converge-info" id="converge-info"></div>
+
+        <!-- 說明圖例 -->
+        <div class="card">
+          <div class="card-title" style="margin-bottom:.6rem;padding-bottom:.5rem;">
+            <span>圖例說明</span>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-arrow r">→</span>
+              <span>白色箭頭 = 隨機策略 π</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-arrow o">→</span>
+              <span>金色箭頭 = 最佳策略 π*</span>
+            </div>
+            <div class="legend-item" style="color:#00d4aa;font-size:.76rem;padding-left:25px">
+              數值（綠）= V(s)　策略評估值
+            </div>
+            <div class="legend-item" style="color:#f59e0b;font-size:.76rem;padding-left:25px">
+              數值（金）= V*(s)　最佳值函數
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="status-item">
-        <span class="dot dot-obstacle"></span>
-        障礙物：<strong id="status-obs">0 / 0</strong>
-      </div>
+      <!-- /右欄 -->
+
     </div>
-
-    <!-- 操作提示 -->
-    <p id="phase-hint">請先生成網格。</p>
-
-    <!-- 網格 -->
-    <div id="grid-wrapper"></div>
-
-    <!-- 圖例 -->
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-box" style="background:#1b6e3a;border-color:#22c55e;"></div>
-        起點（綠色）
-      </div>
-      <div class="legend-item">
-        <div class="legend-box" style="background:#7f1d1d;border-color:#ef4444;"></div>
-        終點（紅色）
-      </div>
-      <div class="legend-item">
-        <div class="legend-box" style="background:#374151;border-color:#6b7280;"></div>
-        障礙物（灰色）
-      </div>
-      <div class="legend-item">
-        <div class="legend-box" style="background:#252a3d;border-color:#6c63ff;"></div>
-        一般格子
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================
-     HW1-2 策略顯示與價值評估
-     ======================== -->
-  <section class="card" id="section-hw1-2">
-    <div class="card-title">
-      <span>HW1-2　隨機策略顯示與價值評估</span>
-      <span class="badge">Policy Evaluation</span>
-    </div>
-
-    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1rem;">
-      設定好起點、終點與障礙物後，點擊以下按鈕，系統將為每個格子
-      隨機生成行動策略（↑↓←→），並透過<strong>迭代策略評估</strong>計算每個狀態的價值 V(s)。
-    </p>
-
-    <div class="control-row">
-      <button class="btn btn-secondary" id="btn-evaluate" disabled>
-        ▶ 執行隨機策略評估
-      </button>
-    </div>
-
-    <!-- 說明 -->
-    <div style="margin-top:1rem;font-size:.82rem;color:var(--text-muted);line-height:1.8;">
-      <p>📐 <strong>MDP 設定：</strong></p>
-      <ul style="padding-left:1.2rem;margin-top:.3rem;">
-        <li>每步獎勵 r = <code>-1</code>，到達終點 r = <code>0</code>（吸收狀態）</li>
-        <li>撞牆或障礙物 → 原地不動，仍扣 1</li>
-        <li>折扣因子 γ = <code>0.9</code>，收斂門檻 θ = <code>1e-6</code></li>
-      </ul>
-      <p style="margin-top:.6rem;">每格左上角顯示 <strong>座標 (r,c)</strong>，中間顯示 <strong>行動箭頭</strong>，下方顯示
-        <strong>V(s)</strong> 值。
-      </p>
-    </div>
-  </section>
-
-  <!-- ========================
-     HW1-3 價值迭代與最佳策略
-     ======================== -->
-  <section class="card" id="section-hw1-3">
-    <div class="card-title">
-      <span>HW1-3　價值迭代與最佳策略</span>
-      <span class="badge badge-gold">Value Iteration</span>
-    </div>
-
-    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1rem;">
-      使用 <strong>Bellman 最優方程式</strong>反覆迭代，找出每個狀態的最佳價值 V*(s) 與最佳策略 π*(s)。
-      結果將覆蓋網格上的箭頭與數值，並以<span class="highlight-text">金色箭頭</span>顯示最佳行動。
-    </p>
-
-    <div class="control-row">
-      <button class="btn btn-gold" id="btn-value-iter" disabled>
-        ⚡ 執行價值迭代（最佳策略）
-      </button>
-    </div>
-
-    <!-- 說明 -->
-    <div style="margin-top:1rem;font-size:.82rem;color:var(--text-muted);line-height:1.8;">
-      <p>🔢 <strong>價值迭代演算法：</strong></p>
-      <ul style="padding-left:1.2rem;margin-top:.3rem;">
-        <li>Bellman 最優更新：V*(s) = max<sub>a</sub> [ R(s,a) + γ · V*(s') ]</li>
-        <li>對所有狀態反覆同步更新，直到最大誤差 δ &lt; θ = <code>1e-6</code></li>
-        <li>從收斂的 V* 貪婪地提取最佳策略 π*(s) = argmax<sub>a</sub> Q*(s,a)</li>
-      </ul>
-      <p style="margin-top:.6rem;">最佳策略完成後，格子箭頭將變為 <span style="color:#f59e0b;font-weight:700;">金色</span>，代表在該狀態下的最佳行動。
-      </p>
-    </div>
-
-    <!-- 比較說明 -->
-    <div class="compare-box" id="compare-box" style="display:none;">
-      <div class="compare-item">
-        <div class="compare-label">🎲 隨機策略 V(s)</div>
-        <div class="compare-grid" id="compare-random"></div>
-      </div>
-      <div class="compare-arrow">➔</div>
-      <div class="compare-item">
-        <div class="compare-label">🏆 最佳策略 V*(s)</div>
-        <div class="compare-grid" id="compare-optimal"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 訊息提示（共用） -->
-  <div class="card" style="max-width:900px;margin:0 auto;">
-    <div id="message"></div>
   </div>
 
   <script src="{{ url_for('static', filename='grid.js') }}"></script>
