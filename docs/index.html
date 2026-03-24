@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>強化學習 HW1 — 網格地圖與策略評估 | 5114056035 Fulong Shi</title>
+    <meta name="description" content="強化學習作業 HW1：互動式 n×n 網格地圖開發、隨機策略顯示與策略評估 V(s)" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ===== 全域變數 ===== */
+        :root {
+            --bg: #0f1117;
+            --card: #1a1d27;
+            --card2: #21253a;
+            --accent: #6c63ff;
+            --accent2: #00d4aa;
+            --gold: #f59e0b;
+            --text: #e8eaf6;
+            --muted: #8890b0;
+            --border: #2e3356;
+            --green-bg: #1b6e3a;
+            --green-bdr: #22c55e;
+            --red-bg: #7f1d1d;
+            --red-bdr: #ef4444;
+            --gray-bg: #374151;
+            --gray-bdr: #6b7280;
+            --cell-def: #252a3d;
+            --cell-hov: #323855;
+            --radius: 12px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem 1rem 5rem;
+        }
+
+        /* 頂部標題 */
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            color: var(--muted);
+            margin-top: .4rem;
+            font-size: .9rem;
+        }
+
+        .student-badge {
+            display: inline-block;
+            margin-top: .6rem;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 99px;
+            padding: .25rem 1rem;
+            font-size: .82rem;
+            color: var(--muted);
+        }
+
+        /* 卡片 */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.8rem 2rem;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .4);
+            max-width: 960px;
+            margin: 0 auto 2rem;
+        }
+
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--accent2);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: .7rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #fff;
+            font-size: .68rem;
+            font-weight: 600;
+            padding: .15rem .55rem;
+            border-radius: 99px;
+        }
+
+        /* 控制列 */
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .8rem;
+            align-items: center;
+            margin-bottom: .6rem;
+        }
+
+        label {
+            color: var(--muted);
+            font-size: .9rem;
+        }
+
+        input[type=number] {
+            width: 75px;
+            padding: .45rem .7rem;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input[type=number]:focus {
+            border-color: var(--accent);
+        }
+
+        /* 按鈕 */
+        .btn {
+            padding: .5rem 1.3rem;
+            border: none;
+            border-radius: 8px;
+            font-size: .88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #9d6fff);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent2), #00b894);
+            color: #0f1117;
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: #0f1117;
+        }
+
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.12);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* 狀態欄 */
+        .status-bar {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin: .8rem 0;
+            font-size: .84rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-s {
+            background: var(--green-bdr);
+        }
+
+        .dot-e {
+            background: var(--red-bdr);
+        }
+
+        .dot-o {
+            background: var(--gray-bdr);
+        }
+
+        /* 提示 */
+        #phase-hint {
+            margin: .6rem 0;
+            font-size: .88rem;
+            font-weight: 500;
+            min-height: 1.3em;
+            color: var(--accent2);
+        }
+
+        #phase-hint.warn {
+            color: #f59e0b;
+        }
+
+        #phase-hint.done {
+            color: var(--green-bdr);
+        }
+
+        /* ===== 網格 ===== */
+        #grid-wrapper {
+            overflow-x: auto;
+            margin-top: 1.2rem;
+        }
+
+        #grid-table {
+            border-collapse: separate;
+            border-spacing: 4px;
+            margin: 0 auto;
+        }
+
+        #grid-table td {
+            width: 72px;
+            height: 72px;
+            text-align: center;
+            vertical-align: middle;
+            background: var(--cell-def);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: background .15s, transform .13s, box-shadow .15s;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        #grid-table td:hover:not(.cell-start):not(.cell-end):not(.cell-obstacle) {
+            background: var(--cell-hov);
+            transform: scale(1.06);
+            border-color: var(--accent);
+            z-index: 2;
+        }
+
+        .cell-coord {
+            font-size: .58rem;
+            color: var(--muted);
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cell-arrow {
+            font-size: 1.4rem;
+            line-height: 1;
+            display: block;
+        }
+
+        .cell-arrow.optimal {
+            color: var(--gold);
+            animation: pulse-gold 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-gold {
+            from {
+                text-shadow: 0 0 6px rgba(245, 158, 11, .6);
+            }
+
+            to {
+                text-shadow: 0 0 18px rgba(245, 158, 11, 1);
+            }
+        }
+
+        .cell-value {
+            font-size: .62rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent2);
+            display: block;
+            margin-top: 1px;
+        }
+
+        /* 狀態顏色 */
+        td.cell-start {
+            background: var(--green-bg);
+            border-color: var(--green-bdr);
+            box-shadow: 0 0 10px rgba(34, 197, 94, .5);
+            cursor: default;
+        }
+
+        td.cell-end {
+            background: var(--red-bg);
+            border-color: var(--red-bdr);
+            box-shadow: 0 0 10px rgba(239, 68, 68, .5);
+            cursor: default;
+        }
+
+        td.cell-obstacle {
+            background: var(--gray-bg);
+            border-color: var(--gray-bdr);
+            cursor: not-allowed;
+        }
+
+        /* 訊息 */
+        #message {
+            margin-top: 1rem;
+            padding: .65rem 1rem;
+            border-radius: 8px;
+            font-size: .88rem;
+            display: none;
+        }
+
+        #message.error {
+            background: rgba(239, 68, 68, .13);
+            color: #fca5a5;
+            display: block;
+        }
+
+        #message.success {
+            background: rgba(34, 197, 94, .11);
+            color: #86efac;
+            display: block;
+        }
+
+        /* 比較面板 */
+        #compare-panel {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        #compare-panel h4 {
+            color: var(--gold);
+            font-size: .9rem;
+            margin-bottom: .7rem;
+        }
+
+        .compare-grid {
+            display: grid;
+            gap: 4px;
+        }
+
+        .cmp-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .cmp-cell {
+            min-width: 88px;
+            padding: .35rem .5rem;
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: .72rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: center;
+        }
+
+        .cmp-cell.improved {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .cmp-cell.label {
+            color: var(--muted);
+            background: transparent;
+            border-color: transparent;
+            font-weight: 600;
+        }
+
+        /* MDP 說明表 */
+        .info-table {
+            font-size: .82rem;
+            color: var(--muted);
+            margin: .6rem 0 0;
+            line-height: 1.9;
+        }
+
+        .info-table code {
+            background: var(--card2);
+            padding: .05rem .35rem;
+            border-radius: 4px;
+            color: var(--accent2);
+        }
+
+        /* 圖例 */
+        .legend {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            font-size: .8rem;
+            margin-top: 1rem;
+            color: var(--muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .legend-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        @media(max-width:600px) {
+            #grid-table td {
+                width: 54px;
+                height: 54px;
+            }
+
+            .cell-arrow {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🤖 強化學習 HW1</h1>
+        <p>網格地圖開發 &amp; 策略評估</p>
+        <span class="student-badge">5114056035 ｜ Fulong Shi</span>
+    </header>
+
+    <!-- HW1-1 -->
+    <section class="card" id="sec-hw1-1">
+        <div class="card-title">
+            <span>HW1-1　網格地圖開發</span>
+            <span class="badge">互動式</span>
+        </div>
+
+        <div class="control-row">
+            <label for="input-n">網格大小 n（5–9）：</label>
+            <input type="number" id="input-n" min="5" max="9" value="5" />
+            <button class="btn btn-primary" id="btn-generate">生成網格</button>
+            <button class="btn btn-secondary" id="btn-reset" style="display:none">↺ 重設格子</button>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-item"><span class="dot dot-s"></span>起點：<strong id="st-start">未設定</strong></div>
+            <div class="status-item"><span class="dot dot-e"></span>終點：<strong id="st-end">未設定</strong></div>
+            <div class="status-item"><span class="dot dot-o"></span>障礙物：<strong id="st-obs">0 / 0</strong></div>
+        </div>
+
+        <p id="phase-hint">請先生成網格。</p>
+        <div id="grid-wrapper"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background:#1b6e3a;border-color:#22c55e"></div>起點
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#7f1d1d;border-color:#ef4444"></div>終點
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#374151;border-color:#6b7280"></div>障礙物
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background:#252a3d;border-color:#6c63ff"></div>一般格子
+            </div>
+        </div>
+    </section>
+
+    <!-- HW1-2 -->
+    <section class="card" id="sec-hw1-2">
+        <div class="card-title">
+            <span>HW1-2　策略顯示與價值評估</span>
+            <span class="badge">Policy Evaluation</span>
+        </div>
+
+        <div class="info-table">
+            <div>📐 MDP 設定：每步 <code>r = -1</code>，到達終點 <code>r = 0</code>（吸收狀態），撞牆/障礙物原地不動</div>
+            <div>折扣因子 <code>γ = 0.9</code>　收斂門檻 <code>θ = 1e-6</code>　最大迭代 <code>10,000</code></div>
+        </div>
+
+        <div class="control-row" style="margin-top:1rem">
+            <button class="btn btn-secondary" id="btn-eval" disabled>▶ 執行隨機策略評估</button>
+            <button class="btn btn-gold" id="btn-reeval" disabled style="display:none">🔄 重新隨機策略</button>
+        </div>
+
+        <div id="message"></div>
+    </section>
+
+    <script>
+        /* =========================================================
+           RL 核心演算法（JavaScript 版）
+           ========================================================= */
+        const ACTIONS = ['up', 'down', 'left', 'right'];
+        const ARROWS = { up: '↑', down: '↓', left: '←', right: '→' };
+        const DR = { up: -1, down: 1, left: 0, right: 0 };
+        const DC = { up: 0, down: 0, left: -1, right: 1 };
+
+        function nextState(r, c, n, action, obstacleSet) {
+            const nr = r + DR[action], nc = c + DC[action];
+            if (nr < 0 || nr >= n || nc < 0 || nc >= n) return [r, c];
+            if (obstacleSet.has(`${nr},${nc}`)) return [r, c];
+            return [nr, nc];
+        }
+
+        function generateRandomPolicy(n, obstacleSet, endKey) {
+            const policy = {};
+            for (let r = 0; r < n; r++)
+                for (let c = 0; c < n; c++) {
+                    const k = `${r},${c}`;
+                    if (obstacleSet.has(k) || k === endKey) continue;
+                    policy[k] = ACTIONS[Math.floor(Math.random() * 4)];
+                }
+            return policy;
+        }
+
+        function policyEvaluation(n, policy, obstacleSet, endKey, gamma = 0.9, theta = 1e-6, maxIter = 10000) {
+            const V = {};
+            for (let r = 0; r < n; r++)
+                for (let c = 0; c < n; c++) V[`${r},${c}`] = 0;
+
+            for (let iter = 0; iter < maxIter; iter++) {
+                let delta = 0;
+                const newV = { ...V };
+                for (let r = 0; r < n; r++) {
+                    for (let c = 0; c < n; c++) {
+                        const k = `${r},${c}`;
+                        if (obstacleSet.has(k)) continue;
+                        if (k === endKey) { newV[k] = 0; continue; }
+                        const action = policy[k]; if (!action) continue;
+                        const [nr, nc] = nextState(r, c, n, action, obstacleSet);
+                        const val = -1 + gamma * V[`${nr},${nc}`];
+                        delta = Math.max(delta, Math.abs(val - V[k]));
+                        newV[k] = val;
+                    }
+                }
+                Object.assign(V, newV);
+                if (delta < theta) break;
+            }
+            return V;
+        }
+
+        /* =========================================================
+           UI 狀態
+           ========================================================= */
+        let G = { n: 0, start: null, end: null, obstacles: [], phase: 'idle', randomV: {} };
+
+        const $ = id => document.getElementById(id);
+        const btnGen = $('btn-generate');
+        const btnReset = $('btn-reset');
+        const btnEval = $('btn-eval');
+        const btnReEval = $('btn-reeval');
+        const inputN = $('input-n');
+        const hint = $('phase-hint');
+        const msg = $('message');
+
+        function showMsg(text, type = 'error') {
+            msg.textContent = text; msg.className = type;
+            if (type === 'success') setTimeout(() => { msg.className = ''; msg.textContent = ''; }, 3500);
+        }
+
+        function updateStatus() {
+            const maxO = G.n > 0 ? G.n - 2 : 0;
+            $('st-start').textContent = G.start ? `(${G.start[0]},${G.start[1]})` : '未設定';
+            $('st-end').textContent = G.end ? `(${G.end[0]},${G.end[1]})` : '未設定';
+            $('st-obs').textContent = `${G.obstacles.length} / ${maxO}`;
+        }
+
+        function updateHint() {
+            const maxO = G.n - 2;
+            const map = {
+                idle: '請先生成網格。',
+                start: '🟢 請點擊格子設定【起點】',
+                end: '🔴 請點擊格子設定【終點】',
+                obstacle: `⬛ 請點擊格子設定障礙物（還可設定 ${maxO - G.obstacles.length} 個）`,
+                done: '✅ 設定完成！可執行【策略評估】',
+            };
+            hint.textContent = map[G.phase] || '';
+            hint.className = G.phase === 'done' ? 'done' : G.phase === 'obstacle' ? 'warn' : '';
+        }
+
+        /* =========================================================
+           生成網格
+           ========================================================= */
+        btnGen.addEventListener('click', () => {
+            const n = parseInt(inputN.value, 10);
+            if (isNaN(n) || n < 5 || n > 9) { showMsg('請輸入 5 到 9 之間的整數！'); return; }
+            msg.className = '';
+            G = { n, start: null, end: null, obstacles: [], phase: 'start', randomV: {} };
+            btnEval.disabled = true;
+            btnReEval.style.display = 'none';
+            btnReset.style.display = 'inline-block';
+            renderGrid(n);
+            updateStatus(); updateHint();
+        });
+
+        /* 重設格子（保留 n，清除所有選擇）*/
+        btnReset.addEventListener('click', () => {
+            if (G.n === 0) return;
+            G = { ...G, start: null, end: null, obstacles: [], phase: 'start', randomV: {} };
+            btnEval.disabled = true;
+            btnReEval.style.display = 'none';
+            renderGrid(G.n);
+            updateStatus(); updateHint();
+            msg.className = '';
+        });
+
+        /* =========================================================
+           繪製網格
+           ========================================================= */
+        function renderGrid(n) {
+            let html = '<table id="grid-table"><tbody>';
+            for (let r = 0; r < n; r++) {
+                html += '<tr>';
+                for (let c = 0; c < n; c++)
+                    html += `<td id="cell-${r}-${c}" data-r="${r}" data-c="${c}">
+        <span class="cell-coord">${r},${c}</span>
+        <span class="cell-arrow" id="arrow-${r}-${c}"></span>
+        <span class="cell-value" id="val-${r}-${c}"></span>
+      </td>`;
+                html += '</tr>';
+            }
+            html += '</tbody></table>';
+            $('grid-wrapper').innerHTML = html;
+            document.querySelectorAll('#grid-table td').forEach(td =>
+                td.addEventListener('click', onCellClick));
+        }
+
+        /* =========================================================
+           格子點擊
+           ========================================================= */
+        function onCellClick(e) {
+            const td = e.currentTarget;
+            if (td.classList.contains('cell-start') ||
+                td.classList.contains('cell-end') ||
+                td.classList.contains('cell-obstacle')) return;
+            if (G.phase === 'idle' || G.phase === 'done') {
+                if (G.phase === 'done') showMsg('設定完成，若要重設請點「↺ 重設格子」。');
+                return;
+            }
+
+            const r = +td.dataset.r, c = +td.dataset.c;
+            msg.className = '';
+
+            if (G.phase === 'start') {
+                G.start = [r, c]; td.classList.add('cell-start'); G.phase = 'end';
+            } else if (G.phase === 'end') {
+                G.end = [r, c]; td.classList.add('cell-end');
+                G.phase = G.n > 2 ? 'obstacle' : 'done';
+            } else if (G.phase === 'obstacle') {
+                G.obstacles.push([r, c]); td.classList.add('cell-obstacle');
+                if (G.obstacles.length >= G.n - 2) G.phase = 'done';
+            }
+
+            if (G.start && G.end) btnEval.disabled = false;
+            updateStatus(); updateHint();
+        }
+
+        /* =========================================================
+           策略評估
+           ========================================================= */
+        function runEval() {
+            if (!G.start || !G.end) { showMsg('請先設定起點與終點！'); return; }
+
+            const obstacleSet = new Set(G.obstacles.map(([r, c]) => `${r},${c}`));
+            const endKey = `${G.end[0]},${G.end[1]}`;
+            const policy = generateRandomPolicy(G.n, obstacleSet, endKey);
+            const V = policyEvaluation(G.n, policy, obstacleSet, endKey);
+            G.randomV = V;
+
+            // 清除舊箭頭
+            for (let r = 0; r < G.n; r++)
+                for (let c = 0; c < G.n; c++) {
+                    const a = $(`arrow-${r}-${c}`); if (a) { a.textContent = ''; a.className = 'cell-arrow'; }
+                    const v = $(`val-${r}-${c}`); if (v) v.textContent = '';
+                }
+
+            // 顯示箭頭與 V(s)
+            for (const [k, action] of Object.entries(policy)) {
+                const [r, c] = k.split(',').map(Number);
+                const a = $(`arrow-${r}-${c}`); if (a) a.textContent = ARROWS[action];
+            }
+            for (const [k, v] of Object.entries(V)) {
+                const [r, c] = k.split(',').map(Number);
+                const el = $(`val-${r}-${c}`); if (el) el.textContent = v.toFixed(2);
+            }
+
+            btnReEval.style.display = 'inline-block';
+            showMsg('策略評估完成！每格已顯示行動箭頭與 V(s) 價值。', 'success');
+        }
+
+        btnEval.addEventListener('click', runEval);
+        btnReEval.addEventListener('click', runEval);
+    </script>
+</body>
+
+</html>
