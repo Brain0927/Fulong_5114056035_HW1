@@ -395,9 +395,14 @@ td.cell-end {
   cursor: default;
 }
 
-td.cell-obstacle {
-  background: var(--gray-bg);
-  border-color: var(--gray-bdr);
+td.cell-obstacle,
+.legend-obstacle {
+  background: repeating-linear-gradient(-45deg,
+      #27272a,
+      #27272a 10px,
+      #eab308 10px,
+      #eab308 20px) !important;
+  border-color: #ca8a04 !important;
   cursor: not-allowed;
 }
 
